@@ -1,0 +1,30 @@
+#Build up ROS
+roscore
+
+#Run simulator
+rosrun stage_ros stageros $(rospack find stage_ros)/world/willow-erratic.world
+
+#Node for joystick
+rosrun joy joy_node 
+
+#Node for tele-operating Twist-based ROS robots with a standard joystick
+rosrun teleop_twist_joy teleop_node
+
+#Launch catkin_ws setup
+. catkin_ws/devel/setup.bash
+
+#Compile code
+catkin_make
+
+#Execute code
+rosrun homework_1 vnode
+
+#To see if the topic was created 
+rostopic list
+
+#Echo topic messages
+rostopic echo /min_val
+
+#See topic graph
+rosrun rqt_graph rqt_graph
+
