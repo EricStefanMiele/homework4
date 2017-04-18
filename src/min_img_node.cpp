@@ -2,25 +2,65 @@
 #include "std_msgs/Float32.h"
 #include "sensor_msgs/LaserScan.h"
 #include <sstream>
+#include <tf/transform_listener.h>
+
+#include <opencv2/core/core.hpp>
+#include <opencv2/highgui/highgui.hpp>
+#include <opencv2/imgproc/imgproc.hpp>
+#include <opencv2/features2d/features2d.hpp>
+#include <stdlib.h>
+#include <stdio.h>
+#include <math.h>
+#include "opencv/cv.h"
+#include "opencv/highgui.h"
 
 void callback(const sensor_msgs::LaserScan::ConstPtr& input){
 	
-	int size = (input->ranges).size();
-	//ROS_INFO("Size: %d", size);
+	using namespace cv;
+	using namespace std;
 	
-	int index;
+	int img_size = 800;
+	int scalar = 20;
 	
-	//float* vec = (input->ranges);
+	Mat img(img_size, img_size, CV_8UC3, Scalar(255, 255, 255));
+	
+	const Scalar black = Scalar(0);
+	
+	float theta = input->angle_min;
+	float min_theta;
+	
 	float min = (input->ranges)[0];
+	float distance;
+	
+	Point p1 = Point((img_size/2) + scalar*min*cos(theta), (img_size/2) + scalar*min*sin(theta));
+	Point p2;
+	
+	int size = (input->ranges).size();
 	
 	for(int i = 1; i < size; ++i){
-	  if((input->ranges)[i] < min) {
-		  min = (input->ranges)[i];
-		  index = i;
-	  }
+		
+		distance = (input->ranges)[i];
+		
+		if(distance < min) {
+			min = distance;
+			min_theta = theta;
+		}
+	
+		theta = theta + input->angle_increment;
+		
+		p2 = Point((img_size/2) + scalar*distance*cos(theta), (img_size/2) + scalar*distance*sin(theta));
+		
+		line(img, p1, p2, Scalar(0, 0, 0), 1, LINE_8 , 0);
+		
+		p1 = p2;
+		
 	}
 	
-	cv::imshow("Shortest distance", );
+	circle(img, Point((img_size/2) + scalar*min*cos(min_theta), (img_size/2) + scalar*min*sin(min_theta)), 5, Scalar(0, 0, 255), 1, LINE_8, 0);
+	
+	imshow("Shortest distance", img);
+	
+	waitKey(1);
   
 }
 
@@ -29,10 +69,8 @@ int main(int argc, char **argv){
 	ros::init(argc, argv, "min_img_node");
 
 	ros::NodeHandle n;
-	
-	//ros::Publisher pub = n.advertise<std_msgs::Float32>("min_val", 1000);
 
-	ros::Subscriber sub = n.subscribe<sensor_msgs::LaserScan>("base_scan", 1000);
+	ros::Subscriber sub = n.subscribe<sensor_msgs::LaserScan>("base_scan", 1000, callback);
 	
 	ros::spin();
 

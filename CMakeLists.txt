@@ -3,7 +3,8 @@ cmake_minimum_required(VERSION 2.8.3)
 project(homework4)
 
 ## Find catkin and any catkin packages
-find_package(catkin REQUIRED COMPONENTS roscpp rospy std_msgs genmsg)
+find_package(catkin REQUIRED COMPONENTS roscpp rospy std_msgs genmsg OpenCV)
+
 
 ## Declare ROS messages and services
 ##add_message_files(FILES Num.msg)
@@ -18,7 +19,7 @@ catkin_package()
 ## Build talker and listener
 include_directories(include ${catkin_INCLUDE_DIRS})
 
-add_executable(min_img_node src/vnode.cpp)
+add_executable(min_img_node src/min_img_node.cpp)
 target_link_libraries(min_img_node ${catkin_LIBRARIES})
 add_dependencies(min_img_node homework4_generate_messages_cpp)
 
